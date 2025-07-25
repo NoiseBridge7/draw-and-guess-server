@@ -81,6 +81,12 @@
   align-items: center;   /* ← center children horizontally */
 }
 
+.room-code {
+  margin: 4px 0;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
 /* Make the inner wrapper full width so its content spans edge‑to‑edge */
 .leaderboard-panel > div {
   width: 100%;
