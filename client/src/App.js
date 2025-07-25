@@ -152,6 +152,7 @@ function App() {
           </aside>
 
           <main className="drawing-panel">
+            <h3 className="room-code">Room: {roomCode}</h3>
             {drawerId !== socket.id && hint && (
               <div className="hint">Hint: {hint}</div>
             )}
