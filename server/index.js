@@ -68,6 +68,16 @@ io.on('connection', (socket) => {
     socket.to(data.roomCode).emit('drawing', data);
   });
 
+  // Handle clear requests from the drawer and broadcast to everyone
+  socket.on('clearBoard', ({ roomCode }) => {
+    const room = getRoom(roomCode);
+    if (!room) return;
+    // wipe out history so replay is clean
+    room.history = [];
+    // tell everyone (drawer and guessers) to clear their canvases
+    io.to(roomCode).emit('clearBoard');
+  });
+  
   socket.on('undo', ({ roomCode }) => {
     const room = rooms[roomCode];
     console.log(`[UNDO] for room ${roomCode}, history length = ${room?.history.length}`);
