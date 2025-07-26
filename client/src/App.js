@@ -47,11 +47,26 @@ function App() {
       if (word) { alert("🎨 Your word: " + word); setWordChosen(true); }
     });
     socket.on("drawerAssigned", id => {
-      setDrawerId(id); setRoundStarted(false); setTimeLeft(null); setHint('');
-      if (id === socket.id && roomCode) {
-        const w = prompt("🧠 Enter a word to draw:");
-        if (w?.trim()) socket.emit("setWord", { roomCode, word: w.trim() });
-        else alert("Must enter a word.");
+      if (drawerId === socket.id && !wordChosen) {
+        return (
+          <div className="word-picker">
+            <h3>Enter a word to draw:</h3>
+            <input
+              value={chosenWord}
+              onChange={e => setChosenWord(e.target.value)}
+              placeholder="e.g. tree"
+            />
+            <button
+              onClick={() => {
+                socket.emit("setWord", { roomCode, word: chosenWord });
+                setWordChosen(true);
+              }}
+              disabled={!chosenWord.trim()}
+            >
+              OK
+            </button>
+          </div>
+        );
       }
     });
     socket.on("wordHint", setHint);
