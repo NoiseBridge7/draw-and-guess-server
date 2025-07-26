@@ -15,6 +15,7 @@ function App() {
   const [players, setPlayers] = useState([]);
   const [hint, setHint] = useState('');
   const [wordChosen, setWordChosen] = useState(false);
+  const [chosenWord, setChosenWord] = useState(""); 
   const [showRejoin, setShowRejoin] = useState(false);
 
   const nameRef = useRef(null);
@@ -47,26 +48,11 @@ function App() {
       if (word) { alert("🎨 Your word: " + word); setWordChosen(true); }
     });
     socket.on("drawerAssigned", id => {
-      if (drawerId === socket.id && !wordChosen) {
-        return (
-          <div className="word-picker">
-            <h3>Enter a word to draw:</h3>
-            <input
-              value={chosenWord}
-              onChange={e => setChosenWord(e.target.value)}
-              placeholder="e.g. tree"
-            />
-            <button
-              onClick={() => {
-                socket.emit("setWord", { roomCode, word: chosenWord });
-                setWordChosen(true);
-              }}
-              disabled={!chosenWord.trim()}
-            >
-              OK
-            </button>
-          </div>
-        );
+      setDrawerId(id); setRoundStarted(false); setTimeLeft(null); setHint('');
+      if (id === socket.id && roomCode) {
+        const w = prompt("🧠 Enter a word to draw:");
+        if (w?.trim()) socket.emit("setWord", { roomCode, word: w.trim() });
+        else alert("Must enter a word.");
       }
     });
     socket.on("wordHint", setHint);
@@ -120,7 +106,7 @@ function App() {
   };
 
   return (
-    <div className="app-grid">
+      <div className="app-grid">
       <header className="header">
         <h1>Draw & Guess Game</h1>
       </header>
@@ -168,9 +154,31 @@ function App() {
 
           <main className="drawing-panel">
             <h3 className="room-code">Room: {roomCode}</h3>
+
+            {drawerId === socket.id && !wordChosen && (
+              <div className="word-picker">
+                <h3>Enter a word to draw:</h3>
+                <input
+                  value={chosenWord}
+                  onChange={e => setChosenWord(e.target.value)}
+                  placeholder="e.g. tree"
+                />
+                <button
+                  onClick={() => {
+                    socket.emit("setWord", { roomCode, word: chosenWord });
+                    setWordChosen(true);
+                  }}
+                  disabled={!chosenWord.trim()}
+                >
+                  OK
+                </button>
+              </div>
+            )}
+
             {drawerId !== socket.id && hint && (
               <div className="hint">Hint: {hint}</div>
             )}
+
             {drawerId === socket.id && wordChosen && !roundStarted && (
               <button
                 className="start-button"
@@ -179,9 +187,11 @@ function App() {
                 Start Round
               </button>
             )}
+
             <h4 className="timer">
-              {roundStarted ? `⏳ ${timeLeft}s left` : "Waiting for round to starrt..."}
+              {roundStarted ? `⏳ ${timeLeft}s left` : "Waiting for round to start..."}
             </h4>
+
             <DrawingBoard roomCode={roomCode} drawerId={drawerId} />
           </main>
 
