@@ -18,6 +18,8 @@ function App() {
   const [chosenWord, setChosenWord] = useState(""); 
   const [showRejoin, setShowRejoin] = useState(false);
 
+  const [guessedPlayers, setGuessedPlayers] = useState([]);
+
   const nameRef = useRef(null);
   const roomRef = useRef(null);
 
@@ -49,6 +51,8 @@ function App() {
     });
     socket.on("drawerAssigned", id => {
       setDrawerId(id); setRoundStarted(false); setTimeLeft(null); setHint('');
+      setGuessedPlayers([]);
+
       // if (id === socket.id && roomCode) {
       //   const w = prompt("🧠 Enter a word to draw:");
       //   if (w?.trim()) socket.emit("setWord", { roomCode, word: w.trim() });
@@ -56,7 +60,7 @@ function App() {
       // }
     });
     socket.on("wordHint", setHint);
-    socket.on("roundStarted", () => { setRoundStarted(true); setHint(''); });
+    socket.on("roundStarted", () => { setRoundStarted(true); setHint(''); setGuessedPlayers([]); });
     socket.on("timerTick", setTimeLeft);
     socket.on("roundEnded", ({ guessedBy }) => {
       setRoundStarted(false); setTimeLeft(null); setHint('');
@@ -105,6 +109,18 @@ function App() {
     });
   };
 
+  const handleGuess = (word) => {
+    if (guessedPlayers.includes(username)) {
+      alert("You've already guessed this round!");
+      return;
+    }
+
+    socket.emit("makeGuess", { roomCode, word });
+
+    // Add this player to the guessedPlayers array to prevent them from guessing again
+    setGuessedPlayers((prev) => [...prev, username]);
+  };
+
   return (
       <div className="app-grid">
       <header className="header">
@@ -113,7 +129,6 @@ function App() {
 
       {!joined ? (
         <aside className="lobby-panel">
-          {/* join/create UI */}
           <input
             ref={nameRef}
             placeholder="Enter your name"
@@ -193,6 +208,19 @@ function App() {
             </h4>
 
             <DrawingBoard roomCode={roomCode} drawerId={drawerId} />
+
+            {drawerId !== socket.id && roundStarted && !guessedPlayers.includes(username) && (
+              <div className="guess-panel">
+                <input
+                  type="text"
+                  placeholder="Guess the word"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleGuess(e.target.value);
+                  }}
+                />
+              </div>
+            )}
+
           </main>
 
           <section className="chat-panel">
