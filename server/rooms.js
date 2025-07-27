@@ -1,5 +1,5 @@
 const rooms = {};
-const ROUND_DURATION = 200; // seconds
+const ROUND_DURATION = 80; // seconds
 
 function createRoom(socket, username) {
   const roomCode = Math.random().toString(36).substring(2, 7);
