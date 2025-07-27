@@ -49,11 +49,11 @@ function App() {
     });
     socket.on("drawerAssigned", id => {
       setDrawerId(id); setRoundStarted(false); setTimeLeft(null); setHint('');
-      if (id === socket.id && roomCode) {
-        const w = prompt("🧠 Enter a word to draw:");
-        if (w?.trim()) socket.emit("setWord", { roomCode, word: w.trim() });
-        else alert("Must enter a word.");
-      }
+      // if (id === socket.id && roomCode) {
+      //   const w = prompt("🧠 Enter a word to draw:");
+      //   if (w?.trim()) socket.emit("setWord", { roomCode, word: w.trim() });
+      //   else alert("Must enter a word.");
+      // }
     });
     socket.on("wordHint", setHint);
     socket.on("roundStarted", () => { setRoundStarted(true); setHint(''); });
